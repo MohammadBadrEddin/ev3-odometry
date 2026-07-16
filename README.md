@@ -68,6 +68,8 @@ ros2 topic echo /ev3/steering
 ```
 
 ## Repository Structure
+
+```
 ev3-odometry/
 ├── ros2_ws/src/
 │   ├── ev3_bridge/       # EV3 bridge + controller node
@@ -77,6 +79,7 @@ ev3-odometry/
 ├── ev3/
 │   └── ev3_server.py     # Runs on EV3 Brick
 └── README.md
+```
 
 ## Version
 
