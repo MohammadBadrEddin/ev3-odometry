@@ -2,7 +2,7 @@
 <?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ev3_bridge</name>
-  <version>0.1.0</version>
+  <version>0.2.0</version>
   <description>EV3 TCP socket bridge - publishes encoder and steering topics</description>
   <maintainer email="mohammadbadreddin13@gmail.com">darkpassenger</maintainer>
   <license>TODO: License declaration</license>
@@ -15,4 +15,5 @@
   <export>
     <build_type>ament_python</build_type>
   </export>
+  <exec_depend>python3-pygame</exec_depend>
 </package>

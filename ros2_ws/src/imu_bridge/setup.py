@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+		'imu_bridge_node = imu_bridge.imu_bridge_node:main',
         ],
     },
 )

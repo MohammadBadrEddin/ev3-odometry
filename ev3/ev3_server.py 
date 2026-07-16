@@ -1,0 +1,93 @@
+#!/usr/bin/env python3
+import socket
+import time
+from ev3dev2.motor import LargeMotor, MediumMotor, OUTPUT_A, OUTPUT_B, OUTPUT_C
+from ev3dev2.power import PowerSupply
+
+# --- Hardware init ---
+motor_steer = MediumMotor(OUTPUT_A)
+motor_left  = LargeMotor(OUTPUT_B)
+motor_right = LargeMotor(OUTPUT_C)
+power       = PowerSupply()
+
+STEER_MIN = 5
+STEER_MAX = 174
+STEER_CENTER = 90
+
+HOST = '0.0.0.0'
+PORT = 5005
+
+def homing():
+    # Drive to left stop, reset encoder, center
+    motor_steer.on(-20)
+    time.sleep(2)
+    motor_steer.off()
+    motor_steer.position = 0
+    motor_steer.on_to_position(50, STEER_CENTER, brake=True, block=True)
+    print("Homing done, centered at " + str(STEER_CENTER))
+
+def handle_command(cmd):
+    # cmd format: "STEER,<ticks>" or "DRIVE,<speed>" or "STOP"
+    parts = cmd.strip().split(',')
+    if parts[0] == 'STEER' and len(parts) == 2:
+        pos = int(parts[1])
+        pos = max(STEER_MIN, min(STEER_MAX, pos))
+        motor_steer.on_to_position(50, pos, brake=True, block=False)
+    elif parts[0] == 'DRIVE' and len(parts) == 2:
+        speed = int(parts[1])
+        speed = max(-100, min(100, speed))
+        motor_left.on(speed)
+        motor_right.on(speed)
+    elif parts[0] == 'STOP':
+        motor_left.off()
+        motor_right.off()
+
+def run_server():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    server.bind((HOST, PORT))
+    server.listen(1)
+    print("EV3 server waiting on port " + str(PORT))
+
+    homing()
+
+    while True:
+        conn, addr = server.accept()
+        conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        conn.settimeout(0.01)  # non-blocking recv
+        print("Connected: " + str(addr))
+
+        try:
+            recv_buf = ""
+            while True:
+                # --- Read sensor data ---
+                enc_r = (motor_left.position + motor_right.position) // 2
+                enc_s = motor_steer.position
+                bat_v = round(power.measured_voltage / 1000000.0, 3)
+
+                msg = str(enc_r) + "," + str(enc_s) + "," + str(bat_v) + "\n"
+                conn.sendall(msg.encode())
+
+                # --- Receive commands (non-blocking) ---
+                try:
+                    data = conn.recv(64).decode()
+                    if data:
+                        recv_buf += data
+                        while "\n" in recv_buf:
+                            line, recv_buf = recv_buf.split("\n", 1)
+                            if line.strip():
+                                handle_command(line.strip())
+                except socket.timeout:
+                    pass  # no command received, continue
+
+                time.sleep(0.02)  # 50 Hz
+
+        except (BrokenPipeError, ConnectionResetError):
+            print("Client disconnected")
+            motor_left.off()
+            motor_right.off()
+
+        finally:
+            conn.close()
+
+run_server()

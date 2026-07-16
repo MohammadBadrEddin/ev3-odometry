@@ -24,6 +24,8 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'ev3_bridge_node = ev3_bridge.ev3_bridge_node:main',
+            'controller_node = ev3_bridge.controller_node:main',
         ],
     },
 )
