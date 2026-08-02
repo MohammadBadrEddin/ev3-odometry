@@ -24,6 +24,7 @@ setup(
     },
     entry_points={
         'console_scripts': [
+            'ev3_odometry_node = ev3_odometry.ev3_odometry_node:main',
         ],
     },
 )
