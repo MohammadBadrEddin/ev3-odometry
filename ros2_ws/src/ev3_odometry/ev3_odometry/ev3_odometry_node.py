@@ -30,6 +30,7 @@ class Ev3OdometryNode(Node):
         self.declare_parameter('steering_center_tick', 90)        # NOTE: assumed from homing, not separately re-measured
         self.declare_parameter('steering_max_tick_dev', 89)       # NOTE: assumed from tick range, not separately re-measured
         self.declare_parameter('steering_max_angle_deg', 47.0)   # confirmed (manually measured)
+        self.declare_parameter('encoder_sign', -1)               # Motor/encoder counts opposite to vehicle fw
 
         self.wheel_circumference = math.pi * self.get_parameter('wheel_diameter_m').value
         self.ticks_per_rev = self.get_parameter('ticks_per_rev').value
@@ -39,6 +40,7 @@ class Ev3OdometryNode(Node):
         self.steer_max_angle = math.radians(
             self.get_parameter('steering_max_angle_deg').value
         )
+        self.encoder_sign = self.get_parameter('encoder_sign').value
 
         # --- State [x, y, psi] ---
         self.x = 0.0
@@ -86,7 +88,7 @@ class Ev3OdometryNode(Node):
             return
 
         dticks = ticks - self.last_enc_ticks
-        distance = (dticks / self.ticks_per_rev) * self.wheel_circumference
+        distance = self.encoder_sign * (dticks / self.ticks_per_rev) * self.wheel_circumference
         v = distance / dt
         delta = self.ticks_to_delta(self.steering_ticks)
 
