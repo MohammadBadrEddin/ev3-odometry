@@ -1,16 +1,15 @@
 <?xml version="1.0"?>
-<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
 <package format="3">
   <name>ev3_bringup</name>
-  <version>0.2.0</version>
-  <description>Launch files for the ev3-odometry system</description>
-  <maintainer email="mohammadbadreddin13@gmail.com">darkpassenger</maintainer>
+  <version>0.5.0</version>
+  <description>Launch files to start the full MeRo1 ROS2 system</description>
+  <maintainer email="mohammadbadreddin13@gmail.com">Mohammad Badreddin</maintainer>
   <license>TODO: License declaration</license>
 
-  <test_depend>ament_copyright</test_depend>
-  <test_depend>ament_flake8</test_depend>
-  <test_depend>ament_pep257</test_depend>
-  <test_depend>python3-pytest</test_depend>
+  <exec_depend>ev3_bridge</exec_depend>
+  <exec_depend>imu_bridge</exec_depend>
+  <exec_depend>ev3_odometry</exec_depend>
+  <exec_depend>ros2launch</exec_depend>
 
   <export>
     <build_type>ament_python</build_type>
