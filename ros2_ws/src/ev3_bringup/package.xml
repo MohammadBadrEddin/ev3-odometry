@@ -1,10 +1,10 @@
 <?xml version="1.0"?>
 <package format="3">
   <name>ev3_bringup</name>
-  <version>0.3.0</version>
+  <version>0.5.0</version>
   <description>Launch files to start the full MeRo1 ROS2 system</description>
   <maintainer email="mohammadbadreddin13@gmail.com">Mohammad Badreddin</maintainer>
-  <license>Apache-2.0</license>
+  <license>TODO: License declaration</license>
 
   <exec_depend>ev3_bridge</exec_depend>
   <exec_depend>imu_bridge</exec_depend>
