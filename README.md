@@ -14,8 +14,8 @@ ROS2-based odometry architecture for a CLEV3R Car EV3 platform with front-axle s
 | Package | Description | Status |
 |---------|-------------|--------|
 | `ev3_bridge` | EV3 TCP socket → `/ev3/encoder_r`, `/ev3/steering`, `/ev3/battery` + `controller_node` | ✅ working |
-| `imu_bridge` | STM32 TCP stream → `/imu/raw` (`sensor_msgs/Imu`) at 50 Hz | ✅ working |
-| `ev3_odometry` | Bicycle model → `/odom` (`nav_msgs/Odometry`) | 🔄 in progress |
+| `imu_bridge` | STM32 TCP stream → `/imu/raw` (`sensor_msgs/Imu`) at ~20 Hz | ✅ working |
+| `ev3_odometry` | Bicycle model → `/odom` (`nav_msgs/Odometry`) `yaw_kalman_node | ✅ working |
 | `ev3_bringup` | Launch files for the full system | 🔄 in progress |
 
 ## ROS2 Topics
@@ -58,6 +58,9 @@ ros2 run ev3_bridge ev3_bridge_node
 
 # Terminal 3 — Controller
 ros2 run ev3_bridge controller_node
+
+# Terminal 4 — Odometry
+ros2 run ev3_odometry ev3_odometry_node
 ```
 
 ### Verify topics
@@ -83,4 +86,4 @@ ev3-odometry/
 
 ## Version
 
-Current: "v0.2.0"
+Current: "v0.5.0"
