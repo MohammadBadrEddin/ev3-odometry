@@ -26,7 +26,7 @@ class Ev3OdometryNode(Node):
         # --- Parameters: physical constants ---
         self.declare_parameter('wheel_diameter_m', 0.043)       # confirmed (manually measured)
         self.declare_parameter('ticks_per_rev', 360)             # confirmed (LargeMotor)
-        self.declare_parameter('wheelbase_m', 0.15)              # confirmed (manually measured)
+        self.declare_parameter('wheelbase_m', 0.16)              # confirmed (manually measured)
         self.declare_parameter('steering_center_tick', 90)        # NOTE: assumed from homing, not separately re-measured
         self.declare_parameter('steering_max_tick_dev', 89)       # NOTE: assumed from tick range, not separately re-measured
         self.declare_parameter('steering_max_angle_deg', 47.0)   # confirmed (manually measured)
