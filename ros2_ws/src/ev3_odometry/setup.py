@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ev3_odometry_node = ev3_odometry.ev3_odometry_node:main',
+            'yaw_kalman_node = ev3_odometry.yaw_kalman_node:main',
         ],
     },
 )
