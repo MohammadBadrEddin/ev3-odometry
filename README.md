@@ -2,6 +2,44 @@
 
 ROS2-based odometry architecture for a CLEV3R Car EV3 platform with front-axle steering and external IMU node.
 
+## EV3 Setup (do this first)
+
+The EV3 has no built-in WiFi — a USB WiFi dongle must be plugged into the brick.
+
+### Connect the EV3 to WiFi
+Via the on-brick Brickman menu: **Wireless and Networks → Networking → [dongle] → Connect**, select your SSID, enter your WiFi password.
+
+Alternatively via CLI (if you already have a connection to the brick, e.g. USB tether):
+```bash
+nmcli device wifi list
+nmcli device wifi connect "<YOUR_SSID>" password "<YOUR_WIFI_PASSWORD>"
+```
+
+After connecting, find the brick's IP:
+```bash
+hostname -I
+```
+This IP changes whenever the EV3 joins a different network. It must match `EV3_IP` in `ros2_ws/src/ev3_bridge/ev3_bridge/ev3_bridge_node.py` — update that constant if it doesn't.
+
+### SSH into the EV3
+```bash
+ssh robot@<EV3_IP>
+# password: maker (ev3dev default login — change here if you've customized it on your brick)
+```
+
+### Start the EV3-side server
+```bash
+# after SSH login:
+cd /home/robot/
+python3 ev3_server.py
+```
+Leave this running for the duration of the session. To survive an SSH disconnect, run it inside `tmux` instead:
+```bash
+tmux new -s ev3server
+python3 ev3_server.py
+# detach: Ctrl+b, then d — reattach later with: tmux attach -t ev3server
+```
+
 ## System Overview
 
 - **EV3 Brick** (ev3dev) — motor control, encoder readout, TCP server
