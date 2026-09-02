@@ -43,14 +43,8 @@ def generate_launch_description():
             name='yaw_kalman_node',
             output='screen',
             parameters=[{
-                # TODO: replace with values derived from real bag data.
-                # Q: see analyze_yaw_tests.py suggested_Q output (from
-                #    stationary-phase gyro noise).
-                # R: still a placeholder until either a multi-point steering
-                #    calibration or >=3 valid repeated circle-test runs
-                #    give a real residual/empirical variance.
-                'Q': 0.001,
-                'R': 0.05,
+                'Q'2.4e-7: ,
+                'R': 5.0,
                 'initial_P': 1.0,
             }],
         ),

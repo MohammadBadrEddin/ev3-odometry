@@ -59,8 +59,8 @@ class YawKalmanNode(Node):
         #    variance from a multi-point steering calibration fit, or
         #    (b) empirical variance from >=3 valid repeated test runs.
         #    TODO: replace once more circle-test runs are available.
-        self.declare_parameter('Q', 0.001)
-        self.declare_parameter('R', 0.05)
+        self.declare_parameter('Q', 2.4e-7)
+        self.declare_parameter('R', 5.0)
         self.declare_parameter('initial_P', 1.0)
 
         self.Q = self.get_parameter('Q').value
