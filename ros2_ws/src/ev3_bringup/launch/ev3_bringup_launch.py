@@ -22,25 +22,30 @@ def generate_launch_description():
             name='ev3_odometry_node',
             output='screen',
             parameters=[{
-                'wheelbase_m': 0.15,
+                'wheelbase_m': 0.16,
                 'steering_max_angle_deg': 47.0,
             }],
         ),
 
-        # IMU is not physically mounted on the robot yet.
-        # Uncomment both nodes below once the STM32 IMU node is installed,
-        # powered, and connected over WiFi -- otherwise imu_bridge_node
-        # will hang waiting for a TCP connection that never arrives.
-        # Node(
-        #     package='imu_bridge',
-        #     executable='imu_bridge_node',
-        #     name='imu_bridge_node',
-        #     output='screen',
-        # ),
-        # Node(
-        #     package='ev3_odometry',
-        #     executable='yaw_kalman_node',
-        #     name='yaw_kalman_node',
-        #     output='screen',
-        # ),
+        # imu_bridge_node's TCP accept() call runs on a background daemon
+        # thread (see receive_loop), so it does NOT block rclpy.spin() or
+        # the rest of the launch if the STM32 is not yet connected -- it
+        # just logs "waiting for STM32" and idles. Safe to always launch.
+        Node(
+            package='imu_bridge',
+            executable='imu_bridge_node',
+            name='imu_bridge_node',
+            output='screen',
+        ),
+        Node(
+            package='ev3_odometry',
+            executable='yaw_kalman_node',
+            name='yaw_kalman_node',
+            output='screen',
+            parameters=[{
+                'Q'2.4e-7: ,
+                'R': 5.0,
+                'initial_P': 1.0,
+            }],
+        ),
     ])

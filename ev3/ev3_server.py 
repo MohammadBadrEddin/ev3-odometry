@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 import socket
 import time
+import math
 from ev3dev2.motor import LargeMotor, MediumMotor, OUTPUT_A, OUTPUT_B, OUTPUT_C
 from ev3dev2.power import PowerSupply
 
-# --- Hardware init ---
 motor_steer = MediumMotor(OUTPUT_A)
 motor_left  = LargeMotor(OUTPUT_B)
 motor_right = LargeMotor(OUTPUT_C)
@@ -13,12 +13,17 @@ power       = PowerSupply()
 STEER_MIN = 5
 STEER_MAX = 174
 STEER_CENTER = 90
+STEER_MAX_DEV = 89
+STEER_MAX_ANGLE_DEG = 47.0
+
+WHEELBASE_L = 0.16
+TRACK_WIDTH = 0.115  # measured: 0.14 outer-to-outer minus 0.025 tire width
 
 HOST = '0.0.0.0'
 PORT = 5005
 
+
 def homing():
-    # Drive to left stop, reset encoder, center
     motor_steer.on(-20)
     time.sleep(2)
     motor_steer.off()
@@ -26,8 +31,27 @@ def homing():
     motor_steer.on_to_position(50, STEER_CENTER, brake=True, block=True)
     print("Homing done, centered at " + str(STEER_CENTER))
 
+
+def steering_ticks_to_delta(ticks):
+    dev = ticks - STEER_CENTER
+    dev = max(-STEER_MAX_DEV, min(STEER_MAX_DEV, dev))
+    max_angle_rad = math.radians(STEER_MAX_ANGLE_DEG)
+    return (dev / STEER_MAX_DEV) * max_angle_rad
+
+
+def split_wheel_speeds(speed, delta):
+    if TRACK_WIDTH is None or abs(delta) < 1e-4:
+        return speed, speed
+    R = WHEELBASE_L / abs(math.tan(delta))
+    v_inner = speed * (R - TRACK_WIDTH / 2.0) / R
+    v_outer = speed * (R + TRACK_WIDTH / 2.0) / R
+    if delta > 0:
+        return v_outer, v_inner
+    else:
+        return v_inner, v_outer
+
+
 def handle_command(cmd):
-    # cmd format: "STEER,<ticks>" or "DRIVE,<speed>" or "STOP"
     parts = cmd.strip().split(',')
     if parts[0] == 'STEER' and len(parts) == 2:
         pos = int(parts[1])
@@ -36,11 +60,14 @@ def handle_command(cmd):
     elif parts[0] == 'DRIVE' and len(parts) == 2:
         speed = int(parts[1])
         speed = max(-100, min(100, speed))
-        motor_left.on(speed)
-        motor_right.on(speed)
+        delta = steering_ticks_to_delta(motor_steer.position)
+        speed_left, speed_right = split_wheel_speeds(speed, delta)
+        motor_left.on(speed_left)
+        motor_right.on(speed_right)
     elif parts[0] == 'STOP':
         motor_left.off()
         motor_right.off()
+
 
 def run_server():
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -54,13 +81,12 @@ def run_server():
     while True:
         conn, addr = server.accept()
         conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-        conn.settimeout(0.01)  # non-blocking recv
+        conn.settimeout(0.01)
         print("Connected: " + str(addr))
 
         try:
             recv_buf = ""
             while True:
-                # --- Read sensor data ---
                 enc_r = (motor_left.position + motor_right.position) // 2
                 enc_s = motor_steer.position
                 bat_v = round(power.measured_voltage / 1000000.0, 3)
@@ -68,7 +94,6 @@ def run_server():
                 msg = str(enc_r) + "," + str(enc_s) + "," + str(bat_v) + "\n"
                 conn.sendall(msg.encode())
 
-                # --- Receive commands (non-blocking) ---
                 try:
                     data = conn.recv(64).decode()
                     if data:
@@ -78,9 +103,9 @@ def run_server():
                             if line.strip():
                                 handle_command(line.strip())
                 except socket.timeout:
-                    pass  # no command received, continue
+                    pass
 
-                time.sleep(0.02)  # 50 Hz
+                time.sleep(0.02)
 
         except (BrokenPipeError, ConnectionResetError):
             print("Client disconnected")
@@ -90,4 +115,6 @@ def run_server():
         finally:
             conn.close()
 
+
 run_server()
+

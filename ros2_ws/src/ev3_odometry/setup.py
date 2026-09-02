@@ -4,7 +4,7 @@ package_name = 'ev3_odometry'
 
 setup(
     name=package_name,
-    version='0.5.0',
+    version='1.0.0',
     packages=find_packages(exclude=['test']),
     data_files=[
         ('share/ament_index/resource_index/packages',
@@ -25,6 +25,7 @@ setup(
     entry_points={
         'console_scripts': [
             'ev3_odometry_node = ev3_odometry.ev3_odometry_node:main',
+            'yaw_kalman_node = ev3_odometry.yaw_kalman_node:main',
         ],
     },
 )
